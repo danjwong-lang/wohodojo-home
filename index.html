@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Free Stock Analyzer — Buy, Hold or Sell Signals | WohoDojo</title>
+  <meta name="description" content="Enter any stock ticker and get an instant buy, hold, or sell signal based on technical analysis. Free, no login required. WohoDojo — Invest Like a Black Belt." />
+  <meta name="keywords" content="free stock analyzer, free stock buy sell signal, free stock technical analysis tool, stock analyzer no login required, simple stock analysis for beginners" />
+  <meta property="og:title" content="Free Stock Analyzer — Buy, Hold or Sell Signals | WohoDojo" />
+  <meta property="og:description" content="Enter any stock ticker. Get an instant buy/hold/sell analysis. Free. No login required." />
+  <meta property="og:image" content="https://stock-analyzer.wohodojo.com/wohodojo-hero.png" />
+  <meta property="og:url" content="https://wohodojo.com" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="canonical" href="https://wohodojo.com" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --navy: #0d1117;
+      --navy-mid: #161c27;
+      --navy-card: #1a2235;
+      --navy-border: #243048;
+      --green: #10b981;
+      --green-glow: rgba(16, 185, 129, 0.2);
+      --gold: #d4a017;
+      --gold-light: #f0c040;
+      --red: #ef4444;
+      --text: #e2e8f0;
+      --text-muted: #8896a7;
+      --font-display: 'Cinzel', serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--navy);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 300;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE TEXTURE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(13, 17, 23, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--navy-border);
+    }
+
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      color: var(--gold-light);
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: var(--green); }
+
+    .nav-cta {
+      background: var(--green);
+      color: #000;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.875rem;
+      padding: 0.5rem 1.25rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .nav-cta:hover { background: #0ea472; transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 1.5rem 4rem;
+      overflow: hidden;
+    }
+
+    /* Radial glow behind hero */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(16,185,129,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Horizontal rule lines — dojo floor feel */
+    .hero-lines {
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 79px,
+          rgba(36, 48, 72, 0.4) 80px
+        );
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-family: var(--font-display);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      padding: 0.3rem 0.9rem;
+      border-radius: 2px;
+      margin-bottom: 1.75rem;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.1s forwards;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 6vw, 4.5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: 0.02em;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.2s forwards;
+    }
+
+    h1 .accent { color: var(--green); }
+    h1 .gold { color: var(--gold-light); }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--text-muted);
+      max-width: 540px;
+      margin: 0 auto 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.35s forwards;
+    }
+
+    .hero-image-wrap {
+      position: relative;
+      margin: 2rem auto 0;
+      max-width: 460px;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.5s forwards;
+    }
+
+    .hero-image-wrap img {
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 0 60px rgba(16,185,129,0.12), 0 20px 60px rgba(0,0,0,0.6);
+    }
+
+    .hero-tagline {
+      margin-top: 1.25rem;
+      font-size: 1rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── CTA BUTTONS ── */
+    .cta-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.45s forwards;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: #000;
+      font-weight: 500;
+      font-size: 1rem;
+      padding: 0.875rem 2rem;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 0 20px var(--green-glow);
+    }
+    .btn-primary:hover {
+      background: #0ea472;
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(16,185,129,0.35);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      font-weight: 400;
+      font-size: 1rem;
+      padding: 0.875rem 2rem;
+      border-radius: 8px;
+      border: 1px solid var(--navy-border);
+      text-decoration: none;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .btn-secondary:hover {
+      border-color: var(--text-muted);
+      transform: translateY(-2px);
+    }
+
+    /* ── SECTION BASE ── */
+    section {
+      position: relative;
+      z-index: 1;
+      padding: 5rem 1.5rem;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 4vw, 2.6rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+
+    .divider {
+      width: 48px;
+      height: 2px;
+      background: var(--green);
+      margin: 1.25rem 0 2rem;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how-section { background: var(--navy-mid); }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+
+    .step-card {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      position: relative;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .step-card:hover {
+      border-color: var(--green);
+      transform: translateY(-3px);
+    }
+
+    .step-num {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--navy-border);
+      line-height: 1;
+      margin-bottom: 0.75rem;
+    }
+
+    .step-card h3 {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .step-card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    /* ── SIGNALS ── */
+    .signals-section { background: var(--navy); }
+
+    .signals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    .signal-pill {
+      border-radius: 10px;
+      padding: 1.25rem 1rem;
+      text-align: center;
+      border: 1px solid transparent;
+    }
+
+    .signal-pill.strong-buy  { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); }
+    .signal-pill.buy         { background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.15); }
+    .signal-pill.hold        { background: rgba(212,160,23,0.08); border-color: rgba(212,160,23,0.2); }
+    .signal-pill.avoid       { background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.15); }
+    .signal-pill.strong-avoid{ background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); }
+
+    .signal-pill .signal-label {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      font-weight: 700;
+    }
+    .strong-buy .signal-label, .buy .signal-label { color: var(--green); }
+    .hold .signal-label { color: var(--gold-light); }
+    .avoid .signal-label, .strong-avoid .signal-label { color: var(--red); }
+
+    .signal-pill p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+    }
+
+    /* ── WHY ── */
+    .why-section { background: var(--navy-mid); }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-top: 2.5rem;
+    }
+
+    .why-card {
+      padding: 1.5rem;
+      border-left: 2px solid var(--green);
+    }
+
+    .why-card h3 {
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 0.4rem;
+    }
+
+    .why-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* ── STORY ── */
+    .story-section { background: var(--navy); }
+
+    .story-inner {
+      max-width: 660px;
+      margin: 0 auto;
+    }
+
+    .story-inner p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .story-inner p strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    blockquote {
+      border-left: 3px solid var(--gold);
+      padding-left: 1.25rem;
+      margin: 2rem 0;
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--text);
+    }
+
+    /* ── FINAL CTA ── */
+    .final-cta {
+      background: var(--navy-mid);
+      text-align: center;
+    }
+
+    .final-cta h2 { margin-bottom: 1rem; }
+    .final-cta p { color: var(--text-muted); margin-bottom: 2rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--navy);
+      border-top: 1px solid var(--navy-border);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    footer a:hover { color: var(--text); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      nav { padding: 0.875rem 1rem; }
+      .hero { padding: 7rem 1rem 3rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="nav-logo">W<span>$</span>HO DOJO</a>
+    <a href="https://stock-analyzer.wohodojo.com" class="nav-cta">Launch the Analyzer →</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-lines"></div>
+
+    <div class="hero-badge">Free Stock Analysis Tool</div>
+
+    <h1>
+      Enter a ticker.<br />
+      Get your <span class="accent">signal</span>.<br />
+      <span class="gold">Invest like a black belt.</span>
+    </h1>
+
+    <p class="hero-sub">
+      Instant buy, hold, or sell analysis powered by technical indicators.
+      No login. No subscription. No BS.
+    </p>
+
+    <div class="cta-group">
+      <a href="https://stock-analyzer.wohodojo.com" class="btn-primary">
+        ⚡ Analyze a Stock — Free
+      </a>
+      <a href="#how-it-works" class="btn-secondary">How it works</a>
+    </div>
+
+    <div class="hero-image-wrap">
+      <img src="https://stock-analyzer.wohodojo.com/wohodojo-hero.png"
+           alt="WohoDojo — two sensei characters with crossed katanas, stock charts in the background"
+           width="460" height="340" />
+      <p class="hero-tagline">Master the market with disciplined technical analysis</p>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section" id="how-it-works">
+    <div class="container">
+      <p class="section-label">The Method</p>
+      <h2>Three steps to your signal</h2>
+      <div class="divider"></div>
+
+      <div class="steps">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <h3>Enter any ticker</h3>
+          <p>Type in a stock symbol or company name — up to 5 at once. No account needed, just go.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <h3>We run the analysis</h3>
+          <p>Our engine scores trend, momentum, market context, price direction, and candlestick patterns in real time.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <h3>Get your signal</h3>
+          <p>A clear recommendation — Strong Buy to Strong Avoid — with a full score breakdown so you understand the why.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SIGNALS -->
+  <section class="signals-section">
+    <div class="container">
+      <p class="section-label">The Scoring System</p>
+      <h2>Five tiers. No gray area.</h2>
+      <div class="divider"></div>
+      <p style="color: var(--text-muted); max-width: 520px;">
+        Each stock gets scored across five technical dimensions and lands in one of five clear tiers. No hedge. No "it depends." Just signal.
+      </p>
+
+      <div class="signals-grid">
+        <div class="signal-pill strong-buy">
+          <div class="signal-label">STRONG BUY</div>
+          <p>Everything is aligned. High conviction entry.</p>
+        </div>
+        <div class="signal-pill buy">
+          <div class="signal-label">BUY</div>
+          <p>Favorable conditions. Worth a position.</p>
+        </div>
+        <div class="signal-pill hold">
+          <div class="signal-label">HOLD</div>
+          <p>Mixed signals. Stay flat or sit tight.</p>
+        </div>
+        <div class="signal-pill avoid">
+          <div class="signal-label">AVOID</div>
+          <p>Conditions are unfavorable. Step aside.</p>
+        </div>
+        <div class="signal-pill strong-avoid">
+          <div class="signal-label">STRONG AVOID</div>
+          <p>Clear downside pressure. Not the time.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY -->
+  <section class="why-section">
+    <div class="container">
+      <p class="section-label">Why WohoDojo</p>
+      <h2>Built different.</h2>
+      <div class="divider"></div>
+
+      <div class="why-grid">
+        <div class="why-card">
+          <h3>Completely free</h3>
+          <p>No trial. No credit card. No freemium wall. We mean it.</p>
+        </div>
+        <div class="why-card">
+          <h3>No login required</h3>
+          <p>Just open it and go. We don't need your email to give you a signal.</p>
+        </div>
+        <div class="why-card">
+          <h3>Real technical analysis</h3>
+          <p>Five scoring dimensions, not just a moving average crossover. Built by someone who actually trades.</p>
+        </div>
+        <div class="why-card">
+          <h3>No noise, just signal</h3>
+          <p>No news feeds, no social sentiment, no hype. Pure technical discipline.</p>
+        </div>
+        <div class="why-card">
+          <h3>Analyze up to 5 at once</h3>
+          <p>Compare a whole watchlist in one shot. Save your favorites for quick access.</p>
+        </div>
+        <div class="why-card">
+          <h3>Mobile ready</h3>
+          <p>Works on your phone while the market is open. No app download needed.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STORY -->
+  <section class="story-section" id="story">
+    <div class="container">
+      <div class="story-inner">
+        <p class="section-label">Why I built this</p>
+        <h2>The sensei origin story</h2>
+        <div class="divider"></div>
+
+        <p>
+          <strong>In January 2024, I got laid off.</strong> After 15+ years in marketing analytics at companies like Stitch Fix and The RealReal, I found myself with something I hadn't had in years: time.
+        </p>
+        <p>
+          I'd always managed my own investments — covered calls, options strategies, stock screening. But I was doing it with a dozen different tools, none of which gave me a clean, unified read on whether to act.
+        </p>
+
+        <blockquote>
+          "I wanted one tool that would look at everything I care about and just tell me: buy, hold, or get out of the way."
+        </blockquote>
+
+        <p>
+          So I spent the past year learning to code with AI, building analytical tools, and eventually — WohoDojo. It's the tool I wanted to exist. It's free because information shouldn't cost you $100/month before you even make a trade.
+        </p>
+        <p>
+          <strong>I use it for my own trades every week.</strong> I hope you find it useful too.
+        </p>
+        <p style="margin-top: 2rem;">
+          — Daniel-San, founder of WohoDojo
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final-cta">
+    <div class="container">
+      <p class="section-label">Ready?</p>
+      <h2>Your first analysis takes 10 seconds.</h2>
+      <p>Enter any ticker. Get your signal. It's free.</p>
+      <a href="https://stock-analyzer.wohodojo.com" class="btn-primary" style="font-size:1.1rem; padding: 1rem 2.5rem;">
+        ⚡ Analyze a Stock Now
+      </a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 WohoDojo — Invest Like a Black Belt</p>
+    <p style="margin-top: 0.5rem;">
+      <a href="https://stock-analyzer.wohodojo.com">Launch the Analyzer</a>
+    </p>
+    <p style="margin-top: 1rem; font-size: 0.72rem; max-width: 540px; margin-left: auto; margin-right: auto;">
+      WohoDojo provides technical analysis signa
